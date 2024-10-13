@@ -1,0 +1,86 @@
+version: '3.1'
+
+services:
+  # Backend Service
+  backend:
+    image: mugemanebertin/eagle_ec_be:latest
+    container_name: express-server-container
+    ports:
+      - "${PORT}:${PORT}"
+    volumes:
+      - ./backend:/usr/src/app
+      - /usr/src/app/node_modules
+    command: sh -c "npm run migrate && npm run seed || true && npm run dev"
+    depends_on:
+      - postgres_db
+      - redis
+    env_file:
+      - ./.env   
+    environment:
+      - DB_CONNECTION=${DOCKER_DB_CONNECTION}
+      - JWT_SECRET=${JWT_SECRET}
+      - PORT=${PORT}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASS=${SMTP_PASS}
+      - CLOUD_NAME=${CLOUD_NAME}
+      - CLOUD_KEY=${CLOUD_KEY}
+      - CLOUD_SECRET=${CLOUD_SECRET}
+      - GOOGLE_CLIENT_ID=${GOOGLE_CLIENT_ID}
+      - GOOGLE_CLIENT_SECRET=${GOOGLE_CLIENT_SECRET}
+      - GOOGLE_CALLBACK_URL=${GOOGLE_CALLBACK_URL}
+      - FE_URL=${FE_URL}
+    networks:
+      - eagle-ec
+
+  # PostgreSQL Database Service
+  postgres_db:
+    image: postgres:latest
+    container_name: postgres-db-container
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_DB=${POSTGRES_DB}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - eagle-ec
+
+  # Redis Service
+  redis:
+    image: redis:latest
+    container_name: redis-container
+    ports:
+      - "6379:6379"
+    networks:
+      - eagle-ec
+
+  # Web Frontend Service
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: eagle-ec-fe-container
+    image: mugemanebertin/eagle-ec-fe
+    ports:
+      - "5173:5173"
+    env_file:
+      - ./.env
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - eagle-ec
+    command: npm run dev -- --host
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
+
+networks:
+  eagle-ec:
+    driver: bridge

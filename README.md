@@ -6,7 +6,7 @@ The front-end of Eagle E-commerce utilizes React for a modern, user-friendly int
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/81fa30232b27b1482f4f/maintainability)](https://codeclimate.com/github/atlp-rwanda/eagles-ec-fe/maintainability)
 ![Github Actions](https://github.com/atlp-rwanda/eagles-ec-fe/actions/workflows/deploy.yml/badge.svg)
-[![codecov](https://codecov.io/gh/atlp-rwanda/eagles-ec-fe/graph/badge.svg?token=MZAXZNVDXC)](https://codecov.io/gh/atlp-rwanda/eagles-ec-fe)
+[![Coverage Status](https://coveralls.io/repos/github/atlp-rwanda/eagles-ec-fe/badge.svg?branch=dev)](https://coveralls.io/github/atlp-rwanda/eagles-ec-fe?branch=dev)
 
 ## Tech Stack
 
@@ -62,6 +62,24 @@ npm install
 
 Write your test by creating a file with .test.tsx extetion under **test** directory.
 
-```
 
-```
+## Running it with Docker Image
+
+## 1. Pull Docker Image:
+
+   ```bash
+   docker pull mugemanebertin/eagle-ec-fe:latest
+   ```
+
+   This command downloads the Docker image `mugemanebertin/eagle-ec-fe` from Docker Hub.
+
+## 2. Run Docker Container:
+
+   ```bash
+   docker run -d --name eagle-ec-fe-container -p 5173:5173 mugemanebertin/eagle-ec-fe:latest
+   ```
+
+   This command starts a Docker container named `eagle-ec-fe-container`, mapping port `5173` on your host to port `5173` in the container. The `-d` flag runs the container in detached mode.
+
+   You can now access the Eagle E-commerce application by navigating to `http://localhost:5173` in your web browser.
+

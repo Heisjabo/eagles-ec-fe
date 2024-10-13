@@ -1,6 +1,8 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { AxiosError } from "axios";
 
+import { setUser } from "../reducers/authSlice";
+
 import axios from "./api";
 
 interface LoginState {
@@ -26,6 +28,23 @@ interface LoginError {
   message: string;
 }
 
+export const fetchUser = createAsyncThunk(
+  "fetchUser",
+  async (id: number, { rejectWithValue, dispatch }) => {
+    try {
+      const response = await axios.get(`/users/${id}`, {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error);
+    }
+  },
+);
+
 export const login = createAsyncThunk<
 LoginResponse,
 LoginPayload,
@@ -33,10 +52,10 @@ LoginPayload,
 >("login", async (payload, { rejectWithValue }) => {
   try {
     const response = await axios.post("/users/login", payload);
+    console.log("Payload being returned:", response.data);
     return response.data;
-  } catch (error) {
-    const axiosError = error as AxiosError<LoginError>;
-    return rejectWithValue(axiosError.response?.data as LoginError);
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data);
   }
 });
 
@@ -49,13 +68,14 @@ const loginApiSlice = createSlice({
       .addCase(login.pending, (state) => {
         state.loading = true;
       })
-      .addCase(login.fulfilled, (state) => {
+      .addCase(login.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
+        localStorage.setItem("accessToken", action.payload.token);
       })
-      .addCase(login.rejected, (state, { payload }) => {
+      .addCase(login.rejected, (state, action) => {
         state.loading = false;
-        state.error = payload?.message ?? "Unknown error";
+        state.error = action.payload?.message ?? "Unknown error";
       });
   },
 });
